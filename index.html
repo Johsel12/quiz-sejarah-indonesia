@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Quiz Sejarah Indonesia</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --merah: #C0392B;
+    --putih: #F5ECD7;
+    --emas: #D4A843;
+    --coklat: #5C3A1E;
+    --coklat-muda: #8B5E3C;
+    --hitam: #1A0F00;
+    --bg: #0F0800;
+    --kartu: #1E1204;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background-color: var(--bg);
+    color: var(--putih);
+    font-family: 'Lora', serif;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  /* Background batik pattern */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      radial-gradient(circle at 20% 20%, rgba(192,57,43,0.08) 0%, transparent 50%),
+      radial-gradient(circle at 80% 80%, rgba(212,168,67,0.08) 0%, transparent 50%),
+      repeating-linear-gradient(45deg, transparent, transparent 40px, rgba(212,168,67,0.02) 40px, rgba(212,168,67,0.02) 41px),
+      repeating-linear-gradient(-45deg, transparent, transparent 40px, rgba(192,57,43,0.02) 40px, rgba(192,57,43,0.02) 41px);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    width: 100%;
+    max-width: 700px;
+    padding: 20px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ===== SCREEN: START ===== */
+  #screen-start {
+    text-align: center;
+    animation: fadeIn 0.8s ease;
+  }
+
+  .garuda-icon {
+    font-size: 72px;
+    margin-bottom: 10px;
+    animation: float 3s ease-in-out infinite;
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+
+  .title-main {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2rem, 6vw, 3.5rem);
+    font-weight: 900;
+    color: var(--emas);
+    text-shadow: 0 0 40px rgba(212,168,67,0.4);
+    line-height: 1.1;
+    margin-bottom: 8px;
+    letter-spacing: -0.5px;
+  }
+
+  .title-sub {
+    font-size: 1rem;
+    color: rgba(245,236,215,0.6);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 30px;
+  }
+
+  .divider {
+    width: 80px;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, var(--emas), transparent);
+    margin: 20px auto;
+  }
+
+  .intro-text {
+    font-style: italic;
+    color: rgba(245,236,215,0.75);
+    font-size: 1rem;
+    line-height: 1.8;
+    max-width: 480px;
+    margin: 0 auto 36px;
+  }
+
+  .btn-start {
+    display: inline-block;
+    background: linear-gradient(135deg, var(--merah), #96281B);
+    color: var(--putih);
+    font-family: 'Playfair Display', serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    padding: 16px 48px;
+    border: 2px solid rgba(212,168,67,0.4);
+    border-radius: 4px;
+    cursor: pointer;
+    letter-spacing: 1px;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn-start::before {
+    content: '';
+    position: absolute;
+    top: 0; left: -100%;
+    width: 100%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+    transition: left 0.4s;
+  }
+
+  .btn-start:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(192,57,43,0.5); border-color: var(--emas); }
+  .btn-start:hover::before { left: 100%; }
+
+  .info-pills {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 28px;
+  }
+
+  .pill {
+    background: rgba(212,168,67,0.1);
+    border: 1px solid rgba(212,168,67,0.3);
+    color: var(--emas);
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 0.82rem;
+    letter-spacing: 0.5px;
+  }
+
+  /* ===== SCREEN: QUIZ ===== */
+  #screen-quiz { display: none; animation: slideUp 0.5s ease; }
+
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  .quiz-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+
+  .q-counter {
+    font-family: 'Playfair Display', serif;
+    font-size: 0.9rem;
+    color: var(--emas);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  .score-badge {
+    background: rgba(192,57,43,0.2);
+    border: 1px solid rgba(192,57,43,0.5);
+    color: #E74C3C;
+    padding: 4px 14px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-family: 'Playfair Display', serif;
+    font-weight: 700;
+  }
+
+  /* Progress */
+  .progress-bar-wrap {
+    background: rgba(255,255,255,0.05);
+    border-radius: 4px;
+    height: 6px;
+    margin-bottom: 28px;
+    overflow: hidden;
+  }
+
+  .progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--merah), var(--emas));
+    border-radius: 4px;
+    transition: width 0.6s ease;
+  }
+
+  /* Timer */
+  .timer-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+
+  .timer-label { font-size: 0.8rem; color: rgba(245,236,215,0.5); letter-spacing: 2px; text-transform: uppercase; }
+
+  .timer-bar-wrap {
+    flex: 1;
+    background: rgba(255,255,255,0.05);
+    border-radius: 4px;
+    height: 8px;
+    overflow: hidden;
+  }
+
+  .timer-bar-fill {
+    height: 100%;
+    width: 100%;
+    background: var(--emas);
+    border-radius: 4px;
+    transition: width 1s linear, background 1s;
+  }
+
+  .timer-bar-fill.warn { background: var(--merah); }
+
+  .timer-num {
+    font-family: 'Playfair Display', serif;
+    font-weight: 700;
+    font-size: 1rem;
+    color: var(--emas);
+    min-width: 28px;
+    text-align: right;
+  }
+
+  /* Question card */
+  .q-card {
+    background: var(--kartu);
+    border: 1px solid rgba(212,168,67,0.2);
+    border-radius: 8px;
+    padding: 28px 32px;
+    margin-bottom: 20px;
+    position: relative;
+  }
+
+  .q-card::before {
+    content: '"';
+    position: absolute;
+    top: 8px; left: 16px;
+    font-family: 'Playfair Display', serif;
+    font-size: 4rem;
+    color: rgba(212,168,67,0.12);
+    line-height: 1;
+    pointer-events: none;
+  }
+
+  .q-text {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.05rem, 2.5vw, 1.25rem);
+    font-weight: 700;
+    color: var(--putih);
+    line-height: 1.6;
+  }
+
+  /* Options */
+  .options-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+
+  @media (max-width: 520px) { .options-grid { grid-template-columns: 1fr; } }
+
+  .opt-btn {
+    background: rgba(255,255,255,0.03);
+    border: 1.5px solid rgba(245,236,215,0.12);
+    color: rgba(245,236,215,0.85);
+    font-family: 'Lora', serif;
+    font-size: 0.92rem;
+    padding: 14px 18px;
+    border-radius: 6px;
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.25s ease;
+    position: relative;
+    overflow: hidden;
+    line-height: 1.4;
+  }
+
+  .opt-btn:hover:not(:disabled) {
+    background: rgba(212,168,67,0.08);
+    border-color: rgba(212,168,67,0.5);
+    color: var(--putih);
+    transform: translateX(3px);
+  }
+
+  .opt-btn.correct {
+    background: rgba(39,174,96,0.15);
+    border-color: #27AE60;
+    color: #2ECC71;
+    pointer-events: none;
+  }
+
+  .opt-btn.wrong {
+    background: rgba(192,57,43,0.15);
+    border-color: var(--merah);
+    color: #E74C3C;
+    pointer-events: none;
+  }
+
+  .opt-btn.disabled-plain { opacity: 0.4; pointer-events: none; }
+
+  .opt-letter {
+    display: inline-block;
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    background: rgba(212,168,67,0.15);
+    border: 1px solid rgba(212,168,67,0.3);
+    color: var(--emas);
+    font-size: 0.75rem;
+    font-family: 'Playfair Display', serif;
+    font-weight: 700;
+    text-align: center;
+    line-height: 22px;
+    margin-right: 10px;
+    flex-shrink: 0;
+  }
+
+  .opt-btn.correct .opt-letter { background: rgba(39,174,96,0.3); border-color: #27AE60; color: #2ECC71; }
+  .opt-btn.wrong .opt-letter { background: rgba(192,57,43,0.3); border-color: var(--merah); color: #E74C3C; }
+
+  .opt-inner { display: flex; align-items: flex-start; }
+
+  /* Feedback */
+  .feedback-box {
+    background: rgba(212,168,67,0.06);
+    border-left: 3px solid var(--emas);
+    padding: 12px 16px;
+    border-radius: 0 6px 6px 0;
+    font-style: italic;
+    color: rgba(245,236,215,0.8);
+    font-size: 0.88rem;
+    line-height: 1.7;
+    margin-bottom: 20px;
+    display: none;
+    animation: fadeIn 0.3s ease;
+  }
+
+  .feedback-box.show { display: block; }
+
+  /* Next btn */
+  .btn-next {
+    display: block;
+    width: 100%;
+    background: linear-gradient(135deg, var(--merah), #96281B);
+    color: var(--putih);
+    font-family: 'Playfair Display', serif;
+    font-size: 1rem;
+    font-weight: 700;
+    padding: 14px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    letter-spacing: 1px;
+    transition: all 0.3s;
+    display: none;
+  }
+
+  .btn-next.show { display: block; animation: fadeIn 0.4s ease; }
+  .btn-next:hover { box-shadow: 0 6px 24px rgba(192,57,43,0.5); transform: translateY(-1px); }
+
+  /* ===== SCREEN: RESULT ===== */
+  #screen-result {
+    display: none;
+    text-align: center;
+    animation: slideUp 0.6s ease;
+  }
+
+  .result-medal { font-size: 80px; margin-bottom: 16px; animation: float 3s ease-in-out infinite; }
+
+  .result-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    font-weight: 900;
+    color: var(--emas);
+    margin-bottom: 8px;
+  }
+
+  .result-quote {
+    font-style: italic;
+    color: rgba(245,236,215,0.6);
+    font-size: 0.9rem;
+    margin-bottom: 28px;
+    max-width: 400px;
+    margin-left: auto; margin-right: auto;
+  }
+
+  .score-circle {
+    width: 140px; height: 140px;
+    border-radius: 50%;
+    border: 3px solid var(--emas);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 28px;
+    background: radial-gradient(circle, rgba(212,168,67,0.1), transparent);
+    box-shadow: 0 0 40px rgba(212,168,67,0.2);
+  }
+
+  .score-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.5rem;
+    font-weight: 900;
+    color: var(--emas);
+    line-height: 1;
+  }
+
+  .score-denom { font-size: 0.85rem; color: rgba(245,236,215,0.5); }
+
+  .stats-row {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-bottom: 32px;
+    flex-wrap: wrap;
+  }
+
+  .stat-card {
+    background: var(--kartu);
+    border: 1px solid rgba(212,168,67,0.15);
+    border-radius: 8px;
+    padding: 14px 24px;
+    text-align: center;
+    min-width: 100px;
+  }
+
+  .stat-val {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+  }
+
+  .stat-val.green { color: #2ECC71; }
+  .stat-val.red { color: #E74C3C; }
+  .stat-val.gold { color: var(--emas); }
+
+  .stat-lbl { font-size: 0.78rem; color: rgba(245,236,215,0.5); letter-spacing: 1px; text-transform: uppercase; margin-top: 2px; }
+
+  .review-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1rem;
+    color: var(--emas);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+
+  .review-list { text-align: left; margin-bottom: 28px; }
+
+  .review-item {
+    background: var(--kartu);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 6px;
+    padding: 12px 16px;
+    margin-bottom: 8px;
+    font-size: 0.86rem;
+    line-height: 1.5;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .review-icon { font-size: 1rem; flex-shrink: 0; margin-top: 1px; }
+  .review-q { color: rgba(245,236,215,0.75); }
+  .review-ans { color: rgba(245,236,215,0.5); font-style: italic; font-size: 0.8rem; }
+  .review-correct { color: #2ECC71; font-size: 0.8rem; }
+
+  .btn-restart {
+    display: inline-block;
+    background: linear-gradient(135deg, var(--coklat), var(--coklat-muda));
+    color: var(--putih);
+    font-family: 'Playfair Display', serif;
+    font-size: 1rem;
+    font-weight: 700;
+    padding: 14px 40px;
+    border: 1px solid rgba(212,168,67,0.3);
+    border-radius: 4px;
+    cursor: pointer;
+    letter-spacing: 1px;
+    transition: all 0.3s;
+    margin: 4px 6px;
+  }
+
+  .btn-restart:hover { box-shadow: 0 6px 24px rgba(92,58,30,0.6); transform: translateY(-2px); border-color: var(--emas); }
+
+  .section-label {
+    font-size: 0.75rem;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: rgba(245,236,215,0.35);
+    margin-bottom: 6px;
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- SCREEN: START -->
+  <div id="screen-start">
+    <div class="garuda-icon">🦅</div>
+    <p class="section-label">Uji Pengetahuan Anda</p>
+    <h1 class="title-main">Quiz Sejarah<br>Indonesia</h1>
+    <div class="divider"></div>
+    <p class="intro-text">
+      "Bangsa yang besar adalah bangsa yang menghargai sejarahnya."<br>
+      — Ir. Soekarno
+    </p>
+    <button class="btn-start" onclick="startQuiz()">Mulai Quiz ▶</button>
+    <div class="info-pills">
+      <span class="pill">📜 10 Soal</span>
+      <span class="pill">⏱ 20 Detik/Soal</span>
+      <span class="pill">🏆 Berbasis Skor</span>
+    </div>
+  </div>
+
+  <!-- SCREEN: QUIZ -->
+  <div id="screen-quiz">
+    <div class="quiz-header">
+      <div class="q-counter" id="q-counter">Soal 1 / 10</div>
+      <div class="score-badge" id="score-live">Skor: 0</div>
+    </div>
+    <div class="progress-bar-wrap">
+      <div class="progress-bar-fill" id="progress-fill" style="width:0%"></div>
+    </div>
+    <div class="timer-row">
+      <div class="timer-label">Waktu</div>
+      <div class="timer-bar-wrap">
+        <div class="timer-bar-fill" id="timer-fill"></div>
+      </div>
+      <div class="timer-num" id="timer-num">20</div>
+    </div>
+    <div class="q-card">
+      <div class="q-text" id="q-text">Pertanyaan akan muncul di sini.</div>
+    </div>
+    <div class="options-grid" id="options-grid"></div>
+    <div class="feedback-box" id="feedback-box"></div>
+    <button class="btn-next" id="btn-next" onclick="nextQuestion()">Soal Berikutnya →</button>
+  </div>
+
+  <!-- SCREEN: RESULT -->
+  <div id="screen-result">
+    <div class="result-medal" id="result-medal">🏆</div>
+    <h2 class="result-title" id="result-title">Luar Biasa!</h2>
+    <p class="result-quote" id="result-quote"></p>
+    <div class="score-circle">
+      <div class="score-num" id="result-score">0</div>
+      <div class="score-denom">dari 10</div>
+    </div>
+    <div class="stats-row" id="stats-row"></div>
+    <div class="review-title">📋 Rekap Jawaban</div>
+    <div class="review-list" id="review-list"></div>
+    <button class="btn-restart" onclick="restartQuiz()">🔄 Main Lagi</button>
+    <button class="btn-restart" onclick="showStart()">🏠 Menu Utama</button>
+  </div>
+
+</div>
+
+<script>
+const ALL_QUESTIONS = [
+  { q: "Pada tanggal berapa Proklamasi Kemerdekaan Indonesia dibacakan?", opts: ["17 Agustus 1945", "1 Juni 1945", "28 Oktober 1928", "20 Mei 1908"], ans: 0, info: "Proklamasi Kemerdekaan Indonesia dibacakan oleh Soekarno-Hatta pada 17 Agustus 1945 di Jl. Pegangsaan Timur No. 56, Jakarta." },
+  { q: "Siapakah yang dikenal sebagai 'Bapak Proklamator' Indonesia?", opts: ["Mohammad Hatta", "Soekarno & Hatta", "Soepomo", "Agus Salim"], ans: 1, info: "Soekarno dan Mohammad Hatta bersama-sama memproklamasikan kemerdekaan Indonesia, sehingga keduanya dijuluki Bapak Proklamator." },
+  { q: "Peristiwa Rengasdengklok terjadi pada tanggal berapa?", opts: ["15 Agustus 1945", "16 Agustus 1945", "17 Agustus 1945", "18 Agustus 1945"], ans: 1, info: "Pada 16 Agustus 1945, para pemuda membawa Soekarno-Hatta ke Rengasdengklok untuk mendesak segera diproklamasikan kemerdekaan." },
+  { q: "Apa nama sumpah yang diucapkan para pemuda pada 28 Oktober 1928?", opts: ["Sumpah Pemuda", "Sumpah Palapa", "Sumpah Sakti", "Sumpah Bhayangkara"], ans: 0, info: "Sumpah Pemuda lahir pada Kongres Pemuda II, 28 Oktober 1928, menyatakan satu tanah air, bangsa, dan bahasa: Indonesia." },
+  { q: "Siapakah pendiri Budi Utomo, organisasi pergerakan modern pertama Indonesia?", opts: ["Soekarno", "Dr. Wahidin Sudirohusodo & Dr. Soetomo", "Ki Hajar Dewantara", "HOS Tjokroaminoto"], ans: 1, info: "Budi Utomo didirikan pada 20 Mei 1908 oleh mahasiswa STOVIA, diprakarsai Dr. Wahidin Sudirohusodo dan Dr. Soetomo." },
+  { q: "Pemberontakan PKI yang terkenal terjadi pada tanggal berapa?", opts: ["30 September 1965", "1 Oktober 1965", "3 Juli 1946", "17 Oktober 1952"], ans: 0, info: "Peristiwa Gerakan 30 September (G30S/PKI) terjadi pada malam 30 September hingga 1 Oktober 1965, menewaskan tujuh perwira tinggi TNI." },
+  { q: "Kapan Indonesia resmi bergabung menjadi anggota PBB untuk pertama kalinya?", opts: ["28 September 1950", "17 Agustus 1950", "5 Juli 1959", "17 Agustus 1945"], ans: 0, info: "Indonesia menjadi anggota PBB ke-60 pada 28 September 1950, setelah pengakuan kedaulatan dari Belanda." },
+  { q: "Apa nama perjanjian yang mengakhiri agresi militer Belanda dan mengakui kedaulatan Indonesia?", opts: ["Perjanjian Renville", "Perjanjian Linggarjati", "Konferensi Meja Bundar", "Perjanjian Roem-Royen"], ans: 2, info: "Konferensi Meja Bundar (KMB) di Den Haag, Desember 1949, menghasilkan pengakuan Belanda atas kedaulatan penuh Indonesia." },
+  { q: "Siapakah presiden kedua Republik Indonesia?", opts: ["B.J. Habibie", "Soeharto", "Megawati Soekarnoputri", "Abdurrahman Wahid"], ans: 1, info: "Soeharto menjabat sebagai Presiden RI kedua dari tahun 1967 hingga 1998, setelah menggantikan Soekarno." },
+  { q: "Dalam peristiwa apa ibu kota Indonesia sempat dipindahkan ke Yogyakarta?", opts: ["Agresi Militer Belanda I", "Agresi Militer Belanda II", "Peristiwa Madiun 1948", "Peristiwa 10 November 1945"], ans: 1, info: "Saat Agresi Militer Belanda II (1948), ibu kota dipindahkan ke Yogyakarta karena Belanda menduduki Jakarta." },
+  { q: "Pertempuran 10 November 1945 di Surabaya melawan tentara mana?", opts: ["Jepang", "Amerika Serikat", "Belanda", "Sekutu (NICA/Inggris)"], ans: 3, info: "Pertempuran 10 November melawan pasukan Sekutu (Inggris-NICA). Hari itu kini diperingati sebagai Hari Pahlawan." },
+  { q: "Siapakah pahlawan wanita dari Aceh yang melawan penjajahan Belanda?", opts: ["R.A. Kartini", "Cut Nyak Dhien", "Dewi Sartika", "Martha Christina Tiahahu"], ans: 1, info: "Cut Nyak Dhien adalah pahlawan nasional dari Aceh yang terus berjuang melawan Belanda meski usianya semakin tua." },
+  { q: "Apa nama operasi militer Indonesia untuk merebut Irian Barat?", opts: ["Operasi Trikora", "Operasi Dwikora", "Operasi Mandala", "Operasi Senja"], ans: 0, info: "Operasi Trikora (1962) dilancarkan Presiden Soekarno untuk merebut Irian Barat dari Belanda, yang akhirnya berhasil melalui diplomasi." },
+  { q: "Bung Tomo dikenal karena pidato berapi-api pada peristiwa apa?", opts: ["Proklamasi Kemerdekaan", "Pertempuran Surabaya 10 November 1945", "Kongres Pemuda 1928", "Pemberontakan PETA"], ans: 1, info: "Bung Tomo (Sutomo) membakar semangat arek-arek Suroboyo melalui siaran radio dalam Pertempuran Surabaya, 10 November 1945." },
+  { q: "Pada era reformasi, presiden pertama yang terpilih secara langsung oleh rakyat Indonesia adalah?", opts: ["B.J. Habibie", "Abdurrahman Wahid", "Megawati Soekarnoputri", "Susilo Bambang Yudhoyono"], ans: 3, info: "Susilo Bambang Yudhoyono (SBY) adalah presiden pertama RI yang dipilih langsung oleh rakyat pada Pemilu 2004." },
+];
+
+let questions = [];
+let currentIdx = 0;
+let score = 0;
+let answered = false;
+let timerInterval = null;
+let timeLeft = 20;
+let history = [];
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function startQuiz() {
+  questions = shuffle(ALL_QUESTIONS).slice(0, 10);
+  currentIdx = 0;
+  score = 0;
+  history = [];
+  document.getElementById('screen-start').style.display = 'none';
+  document.getElementById('screen-result').style.display = 'none';
+  document.getElementById('screen-quiz').style.display = 'block';
+  loadQuestion();
+}
+
+function loadQuestion() {
+  answered = false;
+  const q = questions[currentIdx];
+  document.getElementById('q-counter').textContent = `Soal ${currentIdx + 1} / 10`;
+  document.getElementById('score-live').textContent = `Skor: ${score}`;
+  document.getElementById('progress-fill').style.width = `${(currentIdx / 10) * 100}%`;
+  document.getElementById('q-text').textContent = q.q;
+  document.getElementById('feedback-box').className = 'feedback-box';
+  document.getElementById('btn-next').className = 'btn-next';
+
+  const letters = ['A', 'B', 'C', 'D'];
+  const grid = document.getElementById('options-grid');
+  grid.innerHTML = '';
+  q.opts.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'opt-btn';
+    btn.innerHTML = `<span class="opt-inner"><span class="opt-letter">${letters[i]}</span>${opt}</span>`;
+    btn.onclick = () => selectAnswer(i, btn);
+    grid.appendChild(btn);
+  });
+
+  startTimer();
+}
+
+function startTimer() {
+  clearInterval(timerInterval);
+  timeLeft = 20;
+  updateTimerUI();
+  timerInterval = setInterval(() => {
+    timeLeft--;
+    updateTimerUI();
+    if (timeLeft <= 0) {
+      clearInterval(timerInterval);
+      if (!answered) timeUp();
+    }
+  }, 1000);
+}
+
+function updateTimerUI() {
+  document.getElementById('timer-num').textContent = timeLeft;
+  const pct = (timeLeft / 20) * 100;
+  const fill = document.getElementById('timer-fill');
+  fill.style.width = pct + '%';
+  fill.className = 'timer-bar-fill' + (timeLeft <= 7 ? ' warn' : '');
+}
+
+function timeUp() {
+  answered = true;
+  const q = questions[currentIdx];
+  const btns = document.querySelectorAll('.opt-btn');
+  btns.forEach((b, i) => {
+    if (i === q.ans) b.classList.add('correct');
+    else b.classList.add('disabled-plain');
+  });
+  history.push({ q: q.q, selected: -1, correct: q.ans, opts: q.opts, pass: false });
+  showFeedback('⏰ Waktu habis! ' + q.info);
+  document.getElementById('btn-next').className = 'btn-next show';
+}
+
+function selectAnswer(idx, btnEl) {
+  if (answered) return;
+  answered = true;
+  clearInterval(timerInterval);
+  const q = questions[currentIdx];
+  const btns = document.querySelectorAll('.opt-btn');
+  const isCorrect = idx === q.ans;
+
+  btns.forEach((b, i) => {
+    if (i === q.ans) b.classList.add('correct');
+    else if (i === idx && !isCorrect) b.classList.add('wrong');
+    else b.classList.add('disabled-plain');
+  });
+
+  if (isCorrect) {
+    score++;
+    document.getElementById('score-live').textContent = `Skor: ${score}`;
+    showFeedback('✅ Benar! ' + q.info);
+  } else {
+    showFeedback('❌ Kurang tepat. ' + q.info);
+  }
+
+  history.push({ q: q.q, selected: idx, correct: q.ans, opts: q.opts, pass: isCorrect });
+  document.getElementById('btn-next').className = 'btn-next show';
+}
+
+function showFeedback(text) {
+  const fb = document.getElementById('feedback-box');
+  fb.textContent = text;
+  fb.className = 'feedback-box show';
+}
+
+function nextQuestion() {
+  currentIdx++;
+  if (currentIdx < 10) {
+    loadQuestion();
+  } else {
+    showResult();
+  }
+}
+
+function showResult() {
+  clearInterval(timerInterval);
+  document.getElementById('screen-quiz').style.display = 'none';
+  document.getElementById('screen-result').style.display = 'block';
+  document.getElementById('result-score').textContent = score;
+
+  const medals = ['😞','😕','🙂','😊','😄','🌟','🎖️','🥉','🥈','🥇','🏆'];
+  document.getElementById('result-medal').textContent = medals[score] || '🏆';
+
+  let title, quote;
+  if (score === 10) { title = 'Sempurna! Sang Penjaga Sejarah!'; quote = '"Kamu layak menjadi saksi kejayaan bangsa ini."'; }
+  else if (score >= 8) { title = 'Luar Biasa!'; quote = '"Semangatmu menerangi jalan sejarah."'; }
+  else if (score >= 6) { title = 'Bagus Sekali!'; quote = '"Terus pelajari sejarah, karena di sanalah identitasmu."'; }
+  else if (score >= 4) { title = 'Cukup Baik!'; quote = '"Setiap langkah belajar adalah perjuangan."'; }
+  else { title = 'Terus Belajar!'; quote = '"Mengetahui sejarah adalah kewajiban setiap warga negara."'; }
+
+  document.getElementById('result-title').textContent = title;
+  document.getElementById('result-quote').textContent = quote;
+
+  const wrong = 10 - score;
+  const pct = (score / 10 * 100).toFixed(0);
+  document.getElementById('stats-row').innerHTML = `
+    <div class="stat-card"><div class="stat-val green">${score}</div><div class="stat-lbl">Benar</div></div>
+    <div class="stat-card"><div class="stat-val red">${wrong}</div><div class="stat-lbl">Salah</div></div>
+    <div class="stat-card"><div class="stat-val gold">${pct}%</div><div class="stat-lbl">Akurasi</div></div>
+  `;
+
+  const rl = document.getElementById('review-list');
+  rl.innerHTML = '';
+  history.forEach((h, i) => {
+    const icon = h.pass ? '✅' : '❌';
+    const selectedText = h.selected >= 0 ? h.opts[h.selected] : '(waktu habis)';
+    const correctText = h.opts[h.correct];
+    rl.innerHTML += `
+      <div class="review-item">
+        <span class="review-icon">${icon}</span>
+        <div>
+          <div class="review-q">${i + 1}. ${h.q}</div>
+          ${!h.pass ? `<div class="review-ans">Jawaban Anda: ${selectedText}</div><div class="review-correct">Jawaban benar: ${correctText}</div>` : `<div class="review-correct">Jawaban: ${correctText}</div>`}
+        </div>
+      </div>
+    `;
+  });
+}
+
+function restartQuiz() { startQuiz(); }
+function showStart() {
+  document.getElementById('screen-result').style.display = 'none';
+  document.getElementById('screen-quiz').style.display = 'none';
+  document.getElementById('screen-start').style.display = 'block';
+}
+</script>
+</body>
+</html>
