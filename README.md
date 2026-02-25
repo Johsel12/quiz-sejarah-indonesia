@@ -12,7 +12,7 @@ Dibuat dengan HTML, CSS, dan JavaScript murni — tanpa framework, tanpa install
 
 ## 🚀 Cara Menjalankan
 Buka langsung di browser:
-👉 https://username-kamu.github.io/quiz-sejarah-indonesia
+👉 https://johsel12.github.io/quiz-sejarah-indonesia
 
 Atau download file index.html lalu buka di browser lokal.
 
